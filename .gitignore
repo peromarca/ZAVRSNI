@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# JSON raw dumps (veliki fileovi, nisu potrebni za Qlik)
+python/raw/*.json
+
+# Nested git repo (LaTeX template)
+LaTeX-template-for-final-thesis-at-UniZG-FER/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,710 @@
+\documentclass[zavrsnirad]{fer}
+% Dodaj opciju upload za generiranje konačne verzije koja se učitava na FERWeb
+% \documentclass[zavrsnirad,upload]{fer}
+
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+
+% Postavke za listings (ispisi koda)
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{green!60!black},
+  stringstyle=\color{red!70!black},
+}
+
+%--- PODACI O RADU / THESIS INFORMATION ----------------------------------------
+
+% Naslov na hrvatskom jeziku
+\naslov{Predvi\dj anje financijskih pokazatelja primjenom metoda strojnog u\v{c}enja}
+
+% Naslov na engleskom jeziku
+\title{Forecasting Financial Indicators Using Machine Learning Methods}
+
+% Broj rada
+\brojrada{0000}
+
+% Autor
+\author{Petar}
+
+% Mentor
+\mentor{izv.\ prof.\ dr.\ sc.\ Goran Dela\v{c}}
+
+% Datum na hrvatskom jeziku
+\datum{lipanj, 2026.}
+
+% Datum na engleskom jeziku
+\date{June, 2026}
+
+%-------------------------------------------------------------------------------
+
+\begin{document}
+
+% Naslovnica se automatski generira
+\maketitle
+
+%--- ZADATAK / THESIS ASSIGNMENT -----------------------------------------------
+\zadatak{zadatak.pdf}
+
+%--- ZAHVALE / ACKNOWLEDGMENT --------------------------------------------------
+\begin{zahvale}
+  Zahvaljujem se mentoru izv.\ prof.\ dr.\ sc.\ Goranu Dela\v{c}u na stru\v{c}nom vodstvu i savjetima tijekom izrade ovog zavr\v{s}nog rada. Tako\dj er se zahvaljujem kolegama iz tvrtke Be-Terna na potpori i pristupu alatima koji su omogu\'{c}ili prakti\v{c}nu realizaciju rada.
+\end{zahvale}
+
+% Odovud započinje numeriranje stranica
+\mainmatter
+
+% Sadržaj se automatski generira
+\tableofcontents
+
+
+%===============================================================================
+% POGLAVLJE 1: UVOD
+%===============================================================================
+\chapter{Uvod}
+\label{pog:uvod}
+
+Financijsko planiranje klju\v{c}an je dio upravljanja svakim poslovnim subjektom. Tradicionalni pristupi planiranju i prognoziranju financijskih pokazatelja temelje se na ru\v{c}nim procjenama, povijesnim trendovima i ekspertnom znanju, \v{s}to \v{c}esto dovodi do zna\v{c}ajnih odstupanja izme\dj u planiranih i ostvarenih rezultata. S razvojem podru\v{c}ja strojnog u\v{c}enja otvorile su se nove mogu\'{c}nosti za automatizaciju i pobolj\v{s}anje to\v{c}nosti financijskih prognoza.
+
+U ovom zavr\v{s}nom radu istra\v{z}eni su postupci financijskog planiranja te metode analize odstupanja izme\dj u planiranih i ostvarenih financijskih pokazatelja. Poseban naglasak stavljen je na primjenu statisti\v{c}kih metoda i metoda strojnog u\v{c}enja za modeliranje financijskih kretanja. Prakti\v{c}ni dio rada realiziran je kori\v{s}tenjem platforme Qlik Sense za obradu, transformaciju i vizualizaciju podataka, Qlik Predict za automatizirano predvi\dj anje te programskog jezika Python za implementaciju i usporedbu modela strojnog u\v{c}enja.
+
+Podatci kori\v{s}teni u radu prikupljeni su iz stvarnog poslovnog okru\v{z}enja, pri \v{c}emu su anonimizirani i modificirani radi za\v{s}tite identiteta klijenta. Time je omogu\'{c}en prikaz cjelokupnog postupka -- od prikupljanja i \v{c}i\v{s}\'{c}enja sirovih podataka, preko njihove transformacije u analiti\v{c}ki skup, do kona\v{c}nog predvi\dj anja i usporedbe s ostvarenim vrijednostima.
+
+Rad je organiziran na sljede\'{c}i na\v{c}in. U drugom poglavlju opisani su postupci financijskog planiranja i metode analize odstupanja. Tre\'{c}e poglavlje daje pregled relevantnih metoda strojnog u\v{c}enja za financijsko predvi\dj anje. U \v{c}etvrtom poglavlju predstavljeni su kori\v{s}teni alati -- Qlik Sense, Qlik Predict i Python -- te njihove alternative. Peto poglavlje opisuje postupak pripreme i obrade podataka. \v{S}esto poglavlje prikazuje rezultate predvi\dj anja i usporedbu s ostvarenim vrijednostima. Sedmo poglavlje sadr\v{z}i zaklju\v{c}ak rada.
+
+
+%===============================================================================
+% POGLAVLJE 2: FINANCIJSKO PLANIRANJE I ANALIZA ODSTUPANJA
+%===============================================================================
+\chapter{Financijsko planiranje i analiza odstupanja}
+\label{pog:financijsko_planiranje}
+
+U ovom poglavlju opisani su temeljni postupci financijskog planiranja te metode analize odstupanja izme\dj u planiranih i ostvarenih financijskih pokazatelja. Najprije su prikazani razli\v{c}iti pristupi izradi financijskih planova, zatim su definirani klju\v{c}ni pokazatelji koji se prate, a potom su opisane metode kvantitativne analize odstupanja. Poglavlje zavr\v{s}ava pregledom ograni\v{c}enja tradicionalnih pristupa koja motiviraju primjenu metoda strojnog u\v{c}enja.
+
+\section{Postupci financijskog planiranja}
+\label{sec:postupci_planiranja}
+
+Financijsko planiranje predstavlja proces definiranja financijskih ciljeva organizacije i izrade planova za njihovo ostvarenje \citep{brealey2020principles}. Ovisno o veli\v{c}ini i zrelosti organizacije, primjenjuju se razli\v{c}iti pristupi: od klasi\v{c}nog godi\v{s}njeg bud\v{z}etiranja do agilnijih metoda poput kotrljaju\'{c}e prognoze i scenarij planiranja.
+
+\subsection{Tradicionalno bud\v{z}etiranje}
+\label{subsec:budzetiranje}
+
+Tradicionalno bud\v{z}etiranje najra\v{s}ireniji je oblik financijskog planiranja u kojemu se jednom godi\v{s}nje izra\dj uje detaljan plan prihoda i rashoda za nadolaze\'{c}u fiskalnu godinu \citep{horngren2015cost}. Proces izrade bud\v{z}eta uobi\v{c}ajeno zapo\v{c}inje tri do \v{c}etiri mjeseca prije po\v{c}etka nove fiskalne godine i uklju\v{c}uje iterativno uskla\dj ivanje izme\dj u razli\v{c}itih organizacijskih razina.
+
+Razlikuju se dva osnovna pristupa \citep{horngren2015cost}:
+\begin{itemize}
+    \item \textbf{Pristup odozgo prema dolje} (\engl{top-down}) --- uprava definira ukupne ciljeve i raspodjeljuje ih ni\v{z}im organizacijskim jedinicama. Ovaj pristup omogu\'{c}uje br\v{z}u izradu bud\v{z}eta i konzistentnost sa strate\v{s}kim ciljevima, ali mo\v{z}e rezultirati nerealnim o\v{c}ekivanjima jer ne uzima u obzir operativne specifi\v{c}nosti pojedinih odjela.
+    \item \textbf{Pristup odozdo prema gore} (\engl{bottom-up}) --- svaka organizacijska jedinica izra\dj uje vlastiti prijedlog bud\v{z}eta koji se zatim agregira na razinu cijele organizacije. Ovaj pristup daje realisti\v{c}nije procjene, ali je vremenski zahtjevniji i mo\v{z}e dovesti do pretjerano konzervativnih planova.
+\end{itemize}
+
+U praksi se \v{c}esto koristi kombinacija oba pristupa: uprava postavlja strate\v{s}ke okvire, a odjeli ih razra\dj uju u konkretne bud\v{z}etske stavke. Glavni nedostatak tradicionalnog bud\v{z}etiranja jest njegova stati\v{c}nost --- jednom usvojen, bud\v{z}et se rijetko mijenja tijekom godine, \v{s}to ga \v{c}ini neprikladnim u dinami\v{c}nom poslovnom okru\v{z}enju \citep{brealey2020principles}.
+
+\subsection{Kotrljaju\'{c}a prognoza}
+\label{subsec:rolling_forecast}
+
+Kotrljaju\'{c}a prognoza (\engl{rolling forecast}) sve je popularniji pristup financijskom planiranju u podru\v{c}ju financijskog planiranja i analize (\engl{Financial Planning \& Analysis, FP\&A}). Za razliku od tradicionalnog godi\v{s}njeg bud\v{z}eta koji je vezan uz ra\v{c}unovodstvenu godinu i ostaje nepromijenjen nakon \v{s}to je jednom usvojen, kotrljaju\'{c}a prognoza kontinuirano se a\v{z}urira na kraju svakog planskog razdoblja. Kako navodi \cite{melnychuk2019rolling}, kotrljaju\'{c}a prognoza zna\v{c}i da tvrtka svaki kvartal ili mjesec projicira sljede\'{c}ih \v{c}etiri do \v{s}est kvartala, odnosno dvanaest do osamnaest mjeseci unaprijed.
+
+Glavni nedostaci tradicionalnog pristupa koje kotrljaju\'{c}a prognoza nastoji prevladati su sljede\'{c}i \citep{melnychuk2019rolling}:
+\begin{itemize}
+    \item tradicionalna prognoza \v{c}esto postaje dio evaluacije ciljeva, \v{s}to stvara neefikasnosti i politizaciju procesa planiranja;
+    \item bud\v{z}et je izgra\dj en oko ra\v{c}unovodstvene godine i ne pru\v{z}a dovoljnu vidljivost za planiranje budu\'{c}nosti.
+\end{itemize}
+
+Unato\v{c} prednostima, istra\v{z}ivanja pokazuju da samo oko 25\% tvrtki trenutno koristi kotrljaju\'{c}u prognozu \citep{melnychuk2019rolling}. Razlog sporoj prihva\'{c}enosti le\v{z}i u ve\'{c}em operativnom naporu koji ovaj pristup zahtijeva --- proces a\v{z}uriranja prognoze mora biti dobro automatiziran i podr\v{z}an odgovaraju\'{c}im alatima kako bi bio odr\v{z}iv na du\v{z}i rok.
+
+\subsection{Scenarij planiranje}
+\label{subsec:scenarij_planiranje}
+
+Scenarij planiranje (\engl{scenario planning}) pristup je u kojemu se financijski plan razmatra u kontekstu vi\v{s}e mogu\'{c}ih budu\'{c}ih stanja. Prema \cite{brealey2020principles}, razlikuju se dvije komplementarne tehnike: analiza osjetljivosti (\engl{sensitivity analysis}), u kojoj se pretpostavke mijenjaju jedna po jedna, te analiza scenarija, u kojoj se razmatraju implikacije razli\v{c}itih konzistentnih skupova pretpostavki.
+
+Uobi\v{c}ajeno se definiraju tri scenarija:
+\begin{itemize}
+    \item \textbf{Osnovni scenarij} (\engl{base case}) --- najvjerojatniji ishod temeljen na trenutnim trendovima i o\v{c}ekivanjima.
+    \item \textbf{Optimisti\v{c}ni scenarij} (\engl{best case}) --- pretpostavlja povoljan razvoj klju\v{c}nih varijabli kao \v{s}to su rast potra\v{z}nje, ni\v{z}e kamatne stope ili ve\'{c}a tr\v{z}i\v{s}na ekspanzija.
+    \item \textbf{Pesimisti\v{c}ni scenarij} (\engl{worst case}) --- pretpostavlja nepovoljne uvjete poput recesije, rasta cijena sirovina ili gubitka klju\v{c}nih kupaca.
+\end{itemize}
+
+Primjerice, \cite{brealey2020principles} navode da jedan scenarij mo\v{z}e pretpostavljati visoke kamatne stope koje dovode do usporavanja globalnog gospodarskog rasta i ni\v{z}ih cijena sirovina, dok drugi mo\v{z}e opisivati dinami\v{c}no doma\'{c}e tr\v{z}i\v{s}te s visokom inflacijom i slabom valutom. Ovakav pristup omogu\'{c}uje menad\v{z}mentu pripremu odgovora na razli\v{c}ite razvojne putanje te identificiranje klju\v{c}nih \v{c}imbenika koji najvi\v{s}e utje\v{c}u na financijski rezultat.
+
+\section{Klju\v{c}ni financijski pokazatelji}
+\label{sec:financijski_pokazatelji}
+
+Za u\v{c}inkovito financijsko planiranje i analizu odstupanja nu\v{z}no je definirati skup klju\v{c}nih financijskih pokazatelja (\engl{Key Performance Indicators, KPI}) koji se prate \citep{horngren2015cost}. U kontekstu ovog rada relevantni su sljede\'{c}i pokazatelji:
+
+\textbf{Prihodi} (\engl{revenue}) predstavljaju ukupni iznos ostvaren prodajom proizvoda ili usluga. Mogu se pratiti na razini cijele organizacije ili po pojedinim segmentima (proizvodi, tr\v{z}i\v{s}ta, kupci).
+
+\textbf{Tro\v{s}ak prodane robe} (\engl{Cost of Goods Sold, COGS}) obuhva\'{c}a direktne tro\v{s}kove vezane uz proizvodnju ili nabavu prodanih proizvoda i usluga.
+
+\textbf{Bruto mar\v{z}a} (\engl{gross margin}) definira se kao:
+\begin{equation}
+    \text{Bruto mar\v{z}a} = \text{Prihodi} - \text{COGS}
+    \label{eq:bruto_marza}
+\end{equation}
+
+\textbf{Operativni tro\v{s}kovi} (\engl{Operating Expenses, OPEX}) uklju\v{c}uju sve tro\v{s}kove poslovanja koji nisu izravno vezani uz proizvodnju: administrativne tro\v{s}kove, pla\'{c}e, marketin\v{s}ke tro\v{s}kove i sli\v{c}no.
+
+\textbf{EBITDA} (\engl{Earnings Before Interest, Taxes, Depreciation and Amortization}) jedan je od najva\v{z}nijih pokazatelja operativne u\v{c}inkovitosti \citep{brealey2020principles}:
+\begin{equation}
+    \text{EBITDA} = \text{Prihodi} - \text{COGS} - \text{OPEX}
+    \label{eq:ebitda}
+\end{equation}
+
+\textbf{EBITDA mar\v{z}a} izra\v{z}ava EBITDA kao postotak prihoda:
+\begin{equation}
+    \text{EBITDA mar\v{z}a (\%)} = \frac{\text{EBITDA}}{\text{Prihodi}} \times 100
+    \label{eq:ebitda_marza}
+\end{equation}
+
+Ovi pokazatelji \v{c}ine temelj za analizu odstupanja koja je opisana u nastavku poglavlja, a ujedno predstavljaju ciljne varijable za modele predvi\dj anja koji su opisani u poglavlju~\ref{pog:metode_ml}.
+
+\section{Metode analize odstupanja}
+\label{sec:analiza_odstupanja}
+
+Analiza odstupanja (\engl{variance analysis}) klju\v{c}an je alat za razumijevanje razlika izme\dj u planiranih i ostvarenih rezultata \citep{horngren2015cost}. Cilj analize je kvantificirati veli\v{c}inu odstupanja, identificirati njihove uzroke te pru\v{z}iti informacije za budu\'{c}e odluke.
+
+\subsection{Apsolutno i relativno odstupanje}
+\label{subsec:apsolutno_relativno}
+
+Osnovna mjera odstupanja jest \textbf{apsolutno odstupanje} koje se ra\v{c}una kao razlika izme\dj u ostvarene i planirane vrijednosti \citep{horngren2015cost}:
+\begin{equation}
+    \Delta_{\text{aps}} = X_{\text{ostvareno}} - X_{\text{plan}}
+    \label{eq:apsolutno_odstupanje}
+\end{equation}
+
+Pozitivna vrijednost ukazuje na ve\'{c}u ostvarenu vrijednost od planirane (povoljna varijanca za prihode, nepovoljna za tro\v{s}kove), dok negativna vrijednost ukazuje na suprotno.
+
+\textbf{Relativno odstupanje} izra\v{z}ava razliku kao postotak planirane vrijednosti:
+\begin{equation}
+    \Delta_{\text{rel}} (\%) = \frac{X_{\text{ostvareno}} - X_{\text{plan}}}{X_{\text{plan}}} \times 100
+    \label{eq:relativno_odstupanje}
+\end{equation}
+
+Relativno odstupanje omogu\'{c}uje usporedbu odstupanja razli\v{c}itih pokazatelja neovisno o njihovoj apsolutnoj veli\v{c}ini. Primjer analize odstupanja prikazan je u tablici~\ref{tab:primjer_odstupanja}.
+
+\begin{table}[htb]
+  \centering
+  \caption{Primjer analize odstupanja za odabrane financijske pokazatelje}
+  \label{tab:primjer_odstupanja}
+  \begin{tabular}{lrrrr}
+    \toprule
+    \textbf{Pokazatelj} & \textbf{Plan} & \textbf{Ostvarenje} & \textbf{$\Delta_{\text{aps}}$} & \textbf{$\Delta_{\text{rel}}$ (\%)} \\
+    \midrule
+    Prihodi & 10\,000 & 10\,500 & +500 & +5{,}0 \\
+    COGS & 6\,000 & 6\,300 & +300 & +5{,}0 \\
+    OPEX & 2\,500 & 2\,400 & $-100$ & $-4{,}0$ \\
+    EBITDA & 1\,500 & 1\,800 & +300 & +20{,}0 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Analiza uzroka odstupanja}
+\label{subsec:uzroci_odstupanja}
+
+Detaljnija analiza zahtijeva rastavljanje ukupnog odstupanja na sastavne dijelove. Dva naj\v{c}e\v{s}\'{c}a tipa su \citep{horngren2015cost}:
+
+\textbf{Odstupanje cijene} (\engl{price variance}) mjeri koliki dio ukupnog odstupanja proizlazi iz razlike izme\dj u planirane i ostvarene jedini\v{c}ne cijene:
+\begin{equation}
+    \Delta_{\text{cijena}} = (P_{\text{ost}} - P_{\text{plan}}) \times Q_{\text{ost}}
+    \label{eq:price_variance}
+\end{equation}
+
+\textbf{Odstupanje koli\v{c}ine} (\engl{volume variance}) mjeri koliki dio ukupnog odstupanja proizlazi iz razlike izme\dj u planirane i ostvarene koli\v{c}ine:
+\begin{equation}
+    \Delta_{\text{koli\v{c}ina}} = (Q_{\text{ost}} - Q_{\text{plan}}) \times P_{\text{plan}}
+    \label{eq:volume_variance}
+\end{equation}
+
+gdje $P$ ozna\v{c}ava jedini\v{c}nu cijenu, a $Q$ koli\v{c}inu. Ovakva dekompozicija pru\v{z}a menad\v{z}mentu uvid u to je li odstupanje uzrokovano promjenama cijena na tr\v{z}i\v{s}tu ili promjenama u obujmu prodaje, \v{s}to je klju\v{c}no za dono\v{s}enje korektivnih odluka.
+
+\section{Izazovi tradicionalnog pristupa}
+\label{sec:izazovi}
+
+Tradicionalni pristupi financijskom planiranju i analizi odstupanja suo\v{c}avaju se s nizom ograni\v{c}enja koja postaju sve izraženija u suvremenom poslovnom okru\v{z}enju:
+
+\begin{enumerate}
+    \item \textbf{Ru\v{c}ni procesi i vremenski zahtjevnost} --- izrada godi\v{s}njeg bud\v{z}eta \v{c}esto traje nekoliko mjeseci i zahtijeva zna\v{c}ajne resurse, \v{s}to zna\v{c}i da su pretpostavke na kojima se plan temelji ve\'{c} zastarjele u trenutku kada je bud\v{z}et usvojen.
+    \item \textbf{Pristranost planera} --- ljudske procjene podlo\v{z}ne su kognitivnim pristranostima, uklju\v{c}uju\'{c}i pretjerani optimizam, usidrenje na pro\v{s}logodi\v{s}nje rezultate i grupno mi\v{s}ljenje.
+    \item \textbf{Stati\v{c}nost} --- fiksni godi\v{s}nji bud\v{z}et ne mo\v{z}e adekvatno odraziti promjene koje se dogode tijekom godine, poput promjena tr\v{z}i\v{s}nih uvjeta ili regulatornog okvira.
+    \item \textbf{Neskalabilnost} --- s rastom broja poslovnih segmenata, proizvoda i tr\v{z}i\v{s}ta, ru\v{c}na analiza odstupanja postaje neprakti\v{c}na i podlo\v{z}na pogre\v{s}kama.
+\end{enumerate}
+
+Primjena metoda strojnog u\v{c}enja mo\v{z}e adresirati navedena ograni\v{c}enja. Kako navode \cite{makridakis2018statistical}, modeli strojnog u\v{c}enja mogu automatski identificirati obrasce u podatcima, prilagoditi se promjenama u vremenskim serijama te generirati prognoze bez ljudske pristranosti. U sljede\'{c}em poglavlju dan je pregled relevantnih metoda strojnog u\v{c}enja za financijsko predvi\dj anje.
+
+
+%===============================================================================
+% POGLAVLJE 3: METODE STROJNOG UČENJA ZA FINANCIJSKO PREDVIĐANJE
+%===============================================================================
+\chapter{Metode strojnog u\v{c}enja za financijsko predvi\dj anje}
+\label{pog:metode_ml}
+
+U ovom poglavlju dan je pregled statisti\v{c}kih metoda i metoda strojnog u\v{c}enja primjenjivih na problem predvi\dj anja financijskih pokazatelja. Najprije su opisane klasi\v{c}ne statisti\v{c}ke metode za analizu vremenskih serija, zatim su predstavljene metode strojnog u\v{c}enja te su definirane metrike za evaluaciju to\v{c}nosti modela.
+
+\section{Statisti\v{c}ke metode}
+\label{sec:statisticke_metode}
+
+Statisti\v{c}ke metode za predvi\dj anje vremenskih serija temelje se na matemati\v{c}kim modelima koji opisuju strukturu podataka --- trend, sezonalnost i \v{s}um \citep{hyndman2021forecasting}. Njihova prednost jest visoka interpretabilnost i relativno mali zahtjevi za koli\v{c}inom podataka.
+
+\subsection{ARIMA modeli}
+\label{subsec:arima}
+
+ARIMA (\engl{AutoRegressive Integrated Moving Average}) jedan je od naj\v{s}ire kori\v{s}tenih modela za predvi\dj anje vremenskih serija \citep{box1970time}. Model je definiran s tri parametra $(p, d, q)$:
+
+\begin{itemize}
+    \item $p$ --- red autoregresijskog dijela (\engl{AR}), koji modelira ovisnost trenutne vrijednosti o $p$ prethodnih vrijednosti;
+    \item $d$ --- stupanj diferenciranja potreban da se vremenska serija u\v{c}ini stacionarnom;
+    \item $q$ --- red dijela pomičnog prosjeka (\engl{MA}), koji modelira ovisnost o $q$ prethodnih pogre\v{s}aka predvi\dj anja.
+\end{itemize}
+
+Formalno, ARIMA$(p,d,q)$ model za diferenciranu seriju $y'_t$ mo\v{z}e se zapisati kao \citep{hyndman2021forecasting}:
+\begin{equation}
+    y'_t = c + \phi_1 y'_{t-1} + \cdots + \phi_p y'_{t-p} + \theta_1 \varepsilon_{t-1} + \cdots + \theta_q \varepsilon_{t-q} + \varepsilon_t
+    \label{eq:arima}
+\end{equation}
+
+gdje su $\phi_i$ autoregresijski koeficijenti, $\theta_j$ koeficijenti pomičnog prosjeka, $c$ konstanta, a $\varepsilon_t$ bijeli \v{s}um. Preduvjet za primjenu ARIMA modela jest stacionarnost serije, koja se posti\v{z}e diferenciranjem ($d$-ti red). Odabir optimalnih parametara $p$ i $q$ provodi se analizom autokorelacijske funkcije (ACF) i parcijalne autokorelacijske funkcije (PACF) ili automatski kori\v{s}tenjem informacijskih kriterija poput AIC-a \citep{hyndman2021forecasting}.
+
+Za sezonske podatke koristi se pro\v{s}irenje SARIMA$(p,d,q)(P,D,Q)_m$ koje dodatno modelira sezonske obrasce s periodom $m$.
+
+\subsection{Eksponencijalno zagla\dj ivanje}
+\label{subsec:eksponencijalno_zagladjivanje}
+
+Eksponencijalno zagla\dj ivanje (\engl{exponential smoothing}) obitelj je metoda koje dodjeljuju eksponencijalno opadaju\'{c}e te\v{z}ine starijim opservacijama \citep{hyndman2021forecasting}. Razlikuju se tri varijante:
+
+\textbf{Jednostavno eksponencijalno zagla\dj ivanje} (\engl{Simple Exponential Smoothing, SES}) primjenjivo je na serije bez trenda i sezonalnosti:
+\begin{equation}
+    \hat{y}_{t+1} = \alpha y_t + (1 - \alpha) \hat{y}_t, \quad 0 < \alpha < 1
+    \label{eq:ses}
+\end{equation}
+
+gdje parametar $\alpha$ kontrolira brzinu opadanja te\v{z}ina.
+
+\textbf{Holtova metoda} (\engl{double exponential smoothing}) pro\v{s}iruje SES dodavanjem komponente trenda s parametrom $\beta^*$ za zagla\dj ivanje trenda \citep{hyndman2021forecasting}.
+
+\textbf{Holt-Wintersova metoda} (\engl{triple exponential smoothing}) dodatno uklju\v{c}uje sezonsku komponentu s parametrom $\gamma$ i mo\v{z}e modelirati aditivnu ili multiplikativnu sezonalnost \citep{hyndman2021forecasting}. Ova metoda posebno je pogodna za financijske vremenske serije s izra\v{z}enom mjese\v{c}nom ili kvartalnom sezonalno\v{s}\'{c}u, kao \v{s}to su prihodi ili tro\v{s}kovi koji prate poslovne cikluse.
+
+\subsection{Linearna i vi\v{s}estruka regresija}
+\label{subsec:regresija}
+
+Linearna regresija modelira odnos izme\dj u ciljne varijable $y$ i jedne ili vi\v{s}e nezavisnih varijabli (zna\v{c}ajki) $x_1, x_2, \ldots, x_k$ \citep{hastie2009elements}:
+\begin{equation}
+    y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_k x_k + \varepsilon
+    \label{eq:regresija}
+\end{equation}
+
+gdje su $\beta_i$ koeficijenti modela koji se procjenjuju metodom najmanjih kvadrata, a $\varepsilon$ predstavlja pogre\v{s}ku modela. U kontekstu financijskog predvi\dj anja, zna\v{c}ajke mogu uklju\v{c}ivati makroekonomske indikatore (BDP, inflacija, kamatne stope), povijesne vrijednosti financijskih pokazatelja te sezonske indikatore \citep{masini2023machine}.
+
+Prednosti regresije su visoka interpretabilnost i mogu\'{c}nost kvantificiranja utjecaja pojedinih varijabli. Glavni nedostatak jest pretpostavka linearnog odnosa izme\dj u varijabli, \v{s}to ograni\v{c}ava sposobnost modela da uhvati slo\v{z}ene nelinearne obrasce.
+
+\section{Metode strojnog u\v{c}enja}
+\label{sec:ml_metode}
+
+Metode strojnog u\v{c}enja nadilaze ograni\v{c}enja klasi\v{c}nih statisti\v{c}kih modela jer mogu modelirati nelinearne odnose, automatski odabirati relevantne zna\v{c}ajke te se prilagoditi promjenama u distribuciji podataka \citep{hastie2009elements}.
+
+\subsection{Slu\v{c}ajne \v{s}ume}
+\label{subsec:random_forest}
+
+Slu\v{c}ajne \v{s}ume (\engl{Random Forest}) \textit{ensemble} su metoda koja kombinira predvi\dj anja vi\v{s}e stabala odlu\v{c}ivanja kako bi se postigla ve\'{c}a to\v{c}nost i robusnost \citep{breiman2001random}. Algoritam radi na sljede\'{c}i na\v{c}in:
+
+\begin{enumerate}
+    \item Iz originalnog skupa podataka kreira se $B$ poduzoraka metodom uzorkovanja s ponavljanjem (\engl{bootstrap}).
+    \item Za svaki poduzorak izgra\dj uje se stablo odlu\v{c}ivanja, pri \v{c}emu se u svakom \v{c}voru nasumi\v{c}no odabire podskup zna\v{c}ajki za podjelu.
+    \item Kona\v{c}no predvi\dj anje dobiva se usrednjavanjem predvi\dj anja svih stabala (za regresiju).
+\end{enumerate}
+
+Kona\v{c}no predvi\dj anje za regresijski problem je:
+\begin{equation}
+    \hat{y} = \frac{1}{B} \sum_{b=1}^{B} f_b(\mathbf{x})
+    \label{eq:random_forest}
+\end{equation}
+
+gdje je $f_b$ predvi\dj anje $b$-tog stabla. Klju\v{c}na prednost slu\v{c}ajnih \v{s}uma jest otpornost na prenapu\v{c}enost (\engl{overfitting}) zahvaljuju\'{c}i nasumi\v{c}nosti u odabiru podataka i zna\v{c}ajki \citep{breiman2001random}. Metoda je posebno u\v{c}inkovita za tabelarne podatke s vi\v{s}e zna\v{c}ajki, \v{s}to je \v{c}est slu\v{c}aj u financijskoj analizi.
+
+\subsection{Gradijentno poja\v{c}avanje}
+\label{subsec:gradient_boosting}
+
+Gradijentno poja\v{c}avanje (\engl{Gradient Boosting}) tako\dj er je \textit{ensemble} metoda, ali za razliku od slu\v{c}ajnih \v{s}uma, stabla se grade sekvencijalno --- svako novo stablo u\v{c}i na pogre\v{s}kama prethodnih \citep{hastie2009elements}. XGBoost (\engl{eXtreme Gradient Boosting}) optimizirana je implementacija ovog pristupa koja uklju\v{c}uje regularizaciju, paralelizaciju i u\v{c}inkovito rukovanje nedostaju\'{c}im vrijednostima \citep{chen2016xgboost}.
+
+Model se gradi iterativno:
+\begin{equation}
+    \hat{y}_i^{(t)} = \hat{y}_i^{(t-1)} + \eta \cdot f_t(\mathbf{x}_i)
+    \label{eq:xgboost}
+\end{equation}
+
+gdje je $\hat{y}_i^{(t)}$ predvi\dj anje nakon $t$-te iteracije, $f_t$ novo stablo koje minimizira rezidualnu pogre\v{s}ku, a $\eta$ stopa u\v{c}enja (\engl{learning rate}) koja kontrolira doprinos svakog stabla.
+
+XGBoost se pokazao iznimno uspje\v{s}nim u natjecanjima strojnog u\v{c}enja i u praksi financijskog predvi\dj anja \citep{chen2016xgboost}. Klju\v{c}ni hiperparametri uklju\v{c}uju broj stabala, maksimalnu dubinu stabala, stopu u\v{c}enja te parametre regularizacije ($\lambda$ i $\alpha$).
+
+\subsection{Neuronske mre\v{z}e za vremenske serije}
+\label{subsec:neuronske_mreze}
+
+LSTM (\engl{Long Short-Term Memory}) posebna je vrsta rekurentne neuronske mre\v{z}e dizajnirana za u\v{c}enje dugoro\v{c}nih zavisnosti u sekvencijalnim podatcima \citep{hochreiter1997lstm}. Za razliku od standardnih rekurentnih mre\v{z}a, LSTM koristi mehanizam vrata (\engl{gates}) koji regulira protok informacija:
+
+\begin{itemize}
+    \item \textbf{Vrata zaboravljanja} (\engl{forget gate}) --- odlu\v{c}uju koje informacije iz prethodnog stanja \'{c}elije odbaciti.
+    \item \textbf{Ulazna vrata} (\engl{input gate}) --- odre\dj uju koje nove informacije pohraniti u stanje \'{c}elije.
+    \item \textbf{Izlazna vrata} (\engl{output gate}) --- kontroliraju koje informacije iz stanja \'{c}elije proslijediti na izlaz.
+\end{itemize}
+
+LSTM mre\v{z}e pokazale su se uspje\v{s}nima u predvi\dj anju financijskih vremenskih serija jer mogu uhvatiti slo\v{z}ene vremenske obrasce i nelinearne zavisnosti \citep{fischer2018deep}. Me\dj utim, zahtijevaju ve\'{c}u koli\v{c}inu podataka za treniranje i du\v{z}e vrijeme u\v{c}enja u usporedbi s metodama temeljenim na stablima odlu\v{c}ivanja.
+
+\section{Metrike evaluacije modela}
+\label{sec:metrike}
+
+Za objektivnu usporedbu razli\v{c}itih modela predvi\dj anja nu\v{z}no je definirati kvantitativne metrike to\v{c}nosti. U literaturi se naj\v{c}e\v{s}\'{c}e koriste sljede\'{c}e tri metrike \citep{hyndman2006another}:
+
+\textbf{Srednja apsolutna pogre\v{s}ka} (\engl{Mean Absolute Error, MAE}):
+\begin{equation}
+    \text{MAE} = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|
+    \label{eq:mae}
+\end{equation}
+
+MAE je intuitivna metrika koja izra\v{z}ava prosje\v{c}nu apsolutnu pogre\v{s}ku u istim jedinicama kao i ciljna varijabla.
+
+\textbf{Korijen srednje kvadratne pogre\v{s}ke} (\engl{Root Mean Square Error, RMSE}):
+\begin{equation}
+    \text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}
+    \label{eq:rmse}
+\end{equation}
+
+RMSE je osjetljiviji na velike pogre\v{s}ke od MAE-a jer kvadrira razlike prije usrednjavanja, \v{s}to ga \v{c}ini prikladnim kada su veliki promašaji posebno nepoželjni.
+
+\textbf{Srednja apsolutna postotna pogre\v{s}ka} (\engl{Mean Absolute Percentage Error, MAPE}):
+\begin{equation}
+    \text{MAPE} = \frac{100\%}{n} \sum_{i=1}^{n} \left| \frac{y_i - \hat{y}_i}{y_i} \right|
+    \label{eq:mape}
+\end{equation}
+
+MAPE izra\v{z}ava pogre\v{s}ku kao postotak stvarne vrijednosti, \v{s}to olak\v{s}ava interpretaciju u poslovnom kontekstu. Me\dj utim, nije definirana za $y_i = 0$ i mo\v{z}e dati pristrane rezultate za serije s vrijednostima blizu nule \citep{hyndman2006another}.
+
+Usporedni pregled razmatranih metoda dan je u tablici~\ref{tab:usporedba_metoda}.
+
+\begin{table}[htb]
+  \centering
+  \caption{Usporedba metoda za financijsko predvi\dj anje}
+  \label{tab:usporedba_metoda}
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Metoda} & \textbf{Slo\v{z}enost} & \textbf{Interpretabilnost} & \textbf{To\v{c}nost} & \textbf{Potrebni podatci} \\
+    \midrule
+    ARIMA & Niska & Visoka & Srednja & Mali \\
+    Eksp.\ zagla\dj ivanje & Niska & Visoka & Srednja & Mali \\
+    Regresija & Niska & Visoka & Srednja & Srednji \\
+    Random Forest & Srednja & Srednja & Visoka & Srednji \\
+    XGBoost & Srednja & Niska & Visoka & Srednji \\
+    LSTM & Visoka & Niska & Visoka & Veliki \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Odabir metode za primjenu}
+\label{sec:odabir_metode}
+
+Odabir najprikladnije metode ovisi o karakteristikama podataka, dostupnoj koli\v{c}ini povijesnih opservacija te zahtjevima za interpretabilno\v{s}\'{c}u rezultata. Kako navode \cite{makridakis2018statistical}, ne postoji univerzalno najbolja metoda --- u\v{c}inkovitost pojedinog pristupa varira ovisno o specifi\v{c}nostima konkretnog problema.
+
+Za financijske vremenske serije s relativno malim brojem opservacija (manje od 100 mjese\v{c}nih to\v{c}aka) statisti\v{c}ke metode poput ARIMA i eksponencijalnog zagla\dj ivanja \v{c}esto daju konkurentne rezultate \citep{makridakis2018statistical}. S druge strane, metode strojnog u\v{c}enja poput XGBoosta pokazuju prednost kada su dostupni dodatni prediktori (makroekonomski pokazatelji, sezonski indikatori) i ve\'{c}a koli\v{c}ina podataka \citep{masini2023machine}.
+
+U prakti\v{c}nom dijelu ovog rada usporedba \'{c}e se provesti na dva na\v{c}ina: kori\v{s}tenjem Qlik Predict platforme koja automatski odabire i optimizira model te implementacijom odabranih metoda (ARIMA, XGBoost, LSTM) u programskom jeziku Python. Ovakav pristup omogu\'{c}uje usporedbu no-code rje\v{s}enja s ru\v{c}no implementiranim modelima.
+
+
+%===============================================================================
+% POGLAVLJE 4: KORIŠTENI ALATI I TEHNOLOGIJE
+%===============================================================================
+\chapter{Kori\v{s}teni alati i tehnologije}
+\label{pog:alati}
+
+U ovom poglavlju opisani su alati kori\v{s}teni za realizaciju prakti\v{c}nog dijela rada. Za prikupljanje, transformaciju i vizualizaciju podataka kori\v{s}ten je Qlik Sense, za automatizirano predvi\dj anje Qlik Predict, a za implementaciju i usporedbu modela strojnog u\v{c}enja programski jezik Python. Tako\dj er je kratko opisana mogu\'{c}nost integracije Pythona izravno u Qlik putem SSE mehanizma.
+
+\section{Qlik Sense}
+\label{sec:qlik}
+
+Qlik Sense platforma je za poslovnu inteligenciju (\engl{Business Intelligence, BI}) koju razvija tvrtka Qlik Technologies \citep{qlik2024}. Pozicionirana je kao vode\'{c}i alat u segmentu \textit{self-service} analitike, \v{s}to zna\v{c}i da krajnji korisnici bez tehni\v{c}kog znanja mogu samostalno istra\v{z}ivati podatke, kreirati vizualizacije i otkrivati uvide.
+
+\subsection{Asocijativni model podataka}
+\label{subsec:qlik_model}
+
+Klju\v{c}na razlika Qlik Sensea u odnosu na ve\'{c}inu drugih BI alata jest asocijativni model podataka (\engl{Associative Data Model}). Za razliku od tradicionalnog SQL pristupa koji zahtijeva unaprijed definirane upite i spojeve tablica, Qlik u\v{c}itava sve podatke u memoriju (\engl{in-memory}) i automatski prepoznaje veze izme\dj u tablica na temelju zajedni\v{c}kih polja \citep{qlik2024}.
+
+Ovaj pristup ima nekoliko prednosti:
+\begin{itemize}
+    \item korisnik mo\v{z}e slobodno istra\v{z}ivati podatke bez ograni\v{c}enja unaprijed definiranih hijerarhija;
+    \item sustav istovremeno prikazuje povezane i nepovezane podatke, \v{s}to olak\v{s}ava otkrivanje neo\v{c}ekivanih obrazaca;
+    \item nema potrebe za izradom OLAP kocki ili materijalizi\-ra\-nih pogleda.
+\end{itemize}
+
+\subsection{ETL mogu\'{c}nosti}
+\label{subsec:qlik_etl}
+
+Qlik Sense sadr\v{z}i ugra\dj eni skriptni jezik za ekstrakciju, transformaciju i u\v{c}itavanje podataka (\engl{Extract, Transform, Load --- ETL}). Putem \textit{load scripta} mogu\'{c}e je \citep{qlik2024}:
+\begin{itemize}
+    \item u\v{c}itavati podatke iz razli\v{c}itih izvora (baze podataka, CSV/Excel datoteke, REST API-ji);
+    \item provoditi transformacije poput pivotiranja, agregiranja, spajanja tablica i ra\v{c}unanja izvedenih polja;
+    \item automatizirati periodicno osvje\v{z}avanje podataka.
+\end{itemize}
+
+U kontekstu ovog rada, Qlik load script kori\v{s}ten je za u\v{c}itavanje financijskih podataka iz vi\v{s}e izvora, njihovo \v{c}i\v{s}\'{c}enje i transformaciju u jedinstven analiti\v{c}ki skup.
+
+\subsection{Vizualizacija i izvje\v{s}tavanje}
+\label{subsec:qlik_vizualizacija}
+
+Qlik Sense nudi bogat skup vizualizacijskih objekata --- grafi\v{c}ki prikazi, tablice, KPI objekti, geografske karte i drugi --- koji se sla\v{z}u u interaktivne nadzorne plo\v{c}e (\engl{dashboards}). Korisnici mogu filtrirati podatke klikom na bilo koji element vizualizacije, a asocijativni motor automatski a\v{z}urira sve ostale objekte na plo\v{c}i \citep{qlik2024}.
+
+\section{Qlik Predict}
+\label{sec:qlik_predict}
+
+Qlik Predict (tako\dj er poznat kao Qlik AutoML) komponenta je Qlik Cloud platforme koja omogu\'{c}uje automatizirano strojno u\v{c}enje bez potrebe za programiranjem \citep{qlikpredict2024}. Platforma podr\v{z}ava regresiju, klasifikaciju i predvi\dj anje vremenskih serija.
+
+Klju\v{c}ne zna\v{c}ajke Qlik Predicta uklju\v{c}uju:
+\begin{itemize}
+    \item \textbf{Automatski odabir modela} --- platforma isprobava vi\v{s}e algoritama (uklju\v{c}uju\'{c}i gradijentno poja\v{c}avanje, slu\v{c}ajne \v{s}ume i druge) te odabire onaj s najboljim performansama na validacijskom skupu.
+    \item \textbf{Automatsko in\v{z}enjerstvo zna\v{c}ajki} --- sustav automatski generira i evaluira nove zna\v{c}ajke iz postoje\'{c}ih podataka.
+    \item \textbf{Obja\v{s}njivost modela} --- za svaki model ra\v{c}unaju se SHAP (\engl{SHapley Additive exPlanations}) vrijednosti koje kvantificiraju doprinos svake zna\v{c}ajke predvi\dj anju.
+    \item \textbf{Integracija s Qlik Senseom} --- rezultati predvi\dj anja mogu se koristiti izravno u Qlik aplikacijama putem \texttt{Predict()} funkcije.
+\end{itemize}
+
+U ovom radu Qlik Predict kori\v{s}ten je kao \textit{no-code} pristup predvi\dj anju financijskih pokazatelja, \v{c}iji se rezultati uspore\dj uju s ru\v{c}no implementiranim modelima u Pythonu.
+
+\section{Python ekosustav za strojno u\v{c}enje}
+\label{sec:python_ml}
+
+Programski jezik Python de facto je standard za implementaciju modela strojnog u\v{c}enja zahvaljuju\'{c}i bogatom ekosustavu biblioteka otvorenog koda. U ovom radu kori\v{s}tene su sljede\'{c}e biblioteke:
+
+\begin{itemize}
+    \item \textbf{pandas} --- za u\v{c}itavanje, \v{c}i\v{s}\'{c}enje i transformaciju podataka u tabli\v{c}nom formatu;
+    \item \textbf{statsmodels} --- za implementaciju ARIMA i drugih statisti\v{c}kih modela \citep{statsmodels2024};
+    \item \textbf{scikit-learn} --- za implementaciju Random Foresta, gradijentnog poja\v{c}avanja, regresije te evaluaciju modela \citep{scikitlearn2024};
+    \item \textbf{Keras/TensorFlow} --- za implementaciju LSTM neuronskih mre\v{z}a \citep{keras2024};
+    \item \textbf{matplotlib/seaborn} --- za vizualizaciju rezultata i dijagnostiku modela.
+\end{itemize}
+
+Python implementacija omogu\'{c}uje potpunu kontrolu nad hiperparametrima modela, odabirom zna\v{c}ajki i strategijom evaluacije, \v{s}to pru\v{z}a dopunski uvid u usporedbi s automatiziranim pristupom Qlik Predicta.
+
+\subsection{Integracija Pythona s Qlik Senseom putem SSE}
+\label{subsec:qlik_sse}
+
+Qlik Sense podr\v{z}ava mehanizam pro\v{s}irenja na strani poslu\v{z}itelja (\engl{Server-Side Extensions, SSE}) koji omogu\'{c}uje pozivanje vanjskih analiti\v{c}kih procesa izravno iz Qlik izra\v{c}una \citep{qliksse2024}. Putem SSE konektora, Python skripta mo\v{z}e se pokrenuti kao mikroslu\v{z}ba (\engl{microservice}) koja prima podatke iz Qlika, izvr\v{s}ava analiti\v{c}ke operacije (npr.\ treniranje modela ili generiranje predikcija) te vra\'{c}a rezultate natrag u Qlik aplikaciju.
+
+Ovakva integracija omogu\'{c}uje kombiniranje Qlikovih vizualizacijskih mogućnosti s fleksibilno\v{s}\'{c}u Python ekosustava, \v{s}to je posebno korisno u scenarijima gdje ugra\dj ene mogu\'{c}nosti Qlik Predicta nisu dovoljne za specifi\v{c}ne analiti\v{c}ke zahtjeve.
+
+\section{Alternativni pristupi}
+\label{sec:alternative}
+
+Na tr\v{z}i\v{s}tu postoji niz alternativnih rje\v{s}enja za financijsku analitiku i predvi\dj anje. Kratka usporedba dana je u tablici~\ref{tab:usporedba_alata}.
+
+\textbf{Power BI + Azure ML} --- Microsoftov ekosustav nudi sli\v{c}nu kombinaciju BI vizualizacije i strojnog u\v{c}enja. Power BI pru\v{z}a integraciju s Azure Machine Learning studijom, no konfiguracija ML modela zahtijeva dodatne korake u odnosu na Qlik Predict.
+
+\textbf{SAP Analytics Cloud} --- enterprise rje\v{s}enje koje kombinira planiranje, analitiku i predvi\dj anje u jednoj platformi. Prednost je duboka integracija sa SAP ERP sustavima, ali cijena i slo\v{z}enost ograni\v{c}avaju dostupnost manjim organizacijama.
+
+\textbf{Potpuno Python rje\v{s}enje} --- kori\v{s}tenje isklju\v{c}ivo Python ekosustava (pandas, scikit-learn, Dash/Streamlit za vizualizaciju) pru\v{z}a maksimalnu fleksibilnost, ali zahtijeva zna\v{c}ajno programersko znanje i vi\v{s}e vremena za razvoj.
+
+\begin{table}[htb]
+  \centering
+  \caption{Usporedba alata za financijsku analitiku i predvi\dj anje}
+  \label{tab:usporedba_alata}
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Kriterij} & \textbf{Qlik + Python} & \textbf{Power BI + Azure ML} & \textbf{SAP Analytics} & \textbf{Samo Python} \\
+    \midrule
+    Lako\'{c}a kori\v{s}tenja & Visoka & Srednja & Srednja & Niska \\
+    ML integracija & Ugra\dj ena + ru\v{c}na & Dodatna konfig. & Ugra\dj ena & Potpuna kontrola \\
+    Interpretabilnost & Visoka (SHAP) & Srednja & Srednja & Visoka \\
+    Cijena & Srednja & Srednja & Visoka & Niska \\
+    Skalabilnost & Visoka & Visoka & Visoka & Srednja \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Arhitektura rje\v{s}enja}
+\label{sec:arhitektura}
+
+Arhitektura rje\v{s}enja kori\v{s}tenog u ovom radu sastoji se od tri glavne komponente:
+
+\begin{enumerate}
+    \item \textbf{Qlik Sense (ETL + vizualizacija)} --- prikupljanje podataka iz razli\v{c}itih izvora, \v{c}i\v{s}\'{c}enje, transformacija i u\v{c}itavanje u jedinstven podatkovni model. Vizualizacija rezultata putem interaktivnih nadzornih plo\v{c}a.
+    \item \textbf{Qlik Predict (no-code predvi\dj anje)} --- automatizirano treniranje i evaluacija modela na pripremljenim podatcima, generiranje predikcija dostupnih izravno u Qlik aplikaciji.
+    \item \textbf{Python (ML benchmark)} --- ru\v{c}na implementacija ARIMA, XGBoost i LSTM modela na istom skupu podataka radi usporedbe s automatiziranim pristupom.
+\end{enumerate}
+
+Ovakva arhitektura omogu\'{c}uje objektivnu usporedbu no-code platforme (Qlik Predict) s ru\v{c}no optimiziranim modelima (Python), \v{s}to je jedan od klju\v{c}nih doprinosa ovog rada.
+
+
+%===============================================================================
+% POGLAVLJE 5: PRIPREMA I OBRADA PODATAKA
+%===============================================================================
+\chapter{Priprema i obrada podataka}
+\label{pog:priprema_podataka}
+
+U ovom poglavlju opisan je postupak prikupljanja, anonimizacije, \v{c}i\v{s}\'{c}enja i transformacije podataka u jedinstveni analiti\v{c}ki skup.
+
+\section{Opis izvora podataka}
+\label{sec:izvor_podataka}
+
+% TODO: Opis (anonimiziranog) klijenta - industrija, veličina, tip poslovanja
+
+\section{Postupak anonimizacije}
+\label{sec:anonimizacija}
+
+% TODO: Kako su podatci anonimizirani - promjena naziva, modifikacija iznosa uz očuvanje smislenosti, zaštita identiteta
+
+\section{Struktura podataka}
+\label{sec:struktura_podataka}
+
+% TODO: Opis dataseta - P&L mjesečni podatci, segmenti prihoda, kategorije troškova, makroekonomski indikatori
+
+\begin{table}[htb]
+  \centering
+  \caption{Struktura analiti\v{c}kog skupa podataka}
+  \label{tab:struktura_podataka}
+  \begin{tabular}{llll}
+    \toprule
+    \textbf{Podatak} & \textbf{Granularnost} & \textbf{Period} & \textbf{Izvor} \\
+    \midrule
+    Prihodi po segmentima & Mjese\v{c}no & 2021.--2025. & ERP sustav \\
+    Tro\v{s}kovi (COGS, OPEX) & Mjese\v{c}no & 2021.--2025. & Ra\v{c}unovodstvo \\
+    EBITDA & Mjese\v{c}no & 2021.--2025. & Izvedeno \\
+    Makroekonomski indikatori & Kvartalno & 2021.--2025. & Javni izvori \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{ETL proces u Qlik Senseu}
+\label{sec:etl_proces}
+
+% TODO: Detaljan opis load scripta, transformacija, spajanja tablica
+
+\subsection{\v{C}i\v{s}\'{c}enje podataka}
+\label{subsec:ciscenje}
+
+% TODO: Rukovanje nedostajućim vrijednostima, outlierima, formatima datuma
+
+\subsection{Transformacija i objedinjavanje}
+\label{subsec:transformacija}
+
+% TODO: Pivotiranje, agregiranje, izračun izvedenih pokazatelja
+
+\subsection{Qlik podatkovni model}
+\label{subsec:qlik_model_podataka}
+
+% TODO: Screenshot Qlik data modela, opis tablica i veza
+
+\section{Priprema podataka za predvi\dj anje}
+\label{sec:priprema_predvidjanje}
+
+% TODO: Export iz Qlika, format za Qlik Predict i Python modele, podjela na train/test skupove
+
+
+%===============================================================================
+% POGLAVLJE 6: REZULTATI PREDVIĐANJA I USPOREDBA
+%===============================================================================
+\chapter{Rezultati predvi\dj anja i usporedba}
+\label{pog:rezultati}
+
+U ovom poglavlju prikazani su rezultati predvi\dj anja financijskih pokazatelja te usporedba s ostvarenim vrijednostima.
+
+\section{Konfiguracija modela}
+\label{sec:konfiguracija}
+
+% TODO: Qlik Predict konfiguracija + Python modeli (ARIMA, XGBoost, LSTM), hiperparametri, train/test split (80/20), horizont predvi\dj anja
+
+\section{Rezultati predvi\dj anja}
+\label{sec:rezultati_predvidjanja}
+
+% TODO: Grafovi predikcija za svaki pokazatelj (prihodi, troškovi, EBITDA)
+
+\subsection{Predvi\dj anje prihoda}
+\label{subsec:predvidjanje_prihoda}
+
+% TODO: Graf i tablica - predviđeni vs ostvareni prihodi
+
+\subsection{Predvi\dj anje tro\v{s}kova}
+\label{subsec:predvidjanje_troskova}
+
+% TODO: Graf i tablica - predviđeni vs ostvareni troškovi
+
+\subsection{Predvi\dj anje EBITDA}
+\label{subsec:predvidjanje_ebitda}
+
+% TODO: Graf i tablica - predviđeni vs ostvareni EBITDA
+
+\section{Evaluacija to\v{c}nosti modela}
+\label{sec:evaluacija}
+
+% TODO: Tablice s metrikama (MAE, RMSE, MAPE) za svaki pokazatelj
+
+\begin{table}[htb]
+  \centering
+  \caption{Metrike to\v{c}nosti predvi\dj anja}
+  \label{tab:metrike_tocnosti}
+  \begin{tabular}{lccc}
+    \toprule
+    \textbf{Pokazatelj} & \textbf{MAE} & \textbf{RMSE} & \textbf{MAPE (\%)} \\
+    \midrule
+    Prihodi & -- & -- & -- \\
+    Tro\v{s}kovi & -- & -- & -- \\
+    EBITDA & -- & -- & -- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Usporedba s tradicionalnim pristupom}
+\label{sec:usporedba}
+
+% TODO: Usporedba ML predikcija s npr. naivnom prognozom (prošlogodišnje vrijednosti + rast)
+
+\section{Rasprava}
+\label{sec:rasprava}
+
+% TODO: Interpretacija rezultata, gdje model radi dobro, gdje zakazuje, ograničenja
+
+
+%===============================================================================
+% POGLAVLJE 7: ZAKLJUČAK
+%===============================================================================
+\chapter{Zaklju\v{c}ak}
+\label{pog:zakljucak}
+
+% TODO: Sažetak nalaza, doprinos rada, ograničenja, prijedlozi za budući rad
+
+
+%--- LITERATURA / REFERENCES ---------------------------------------------------
+\bibliography{literatura}
+
+
+%--- SAŽETAK / ABSTRACT --------------------------------------------------------
+
+% Sažetak na hrvatskom
+\begin{sazetak}
+  U ovom zavr\v{s}nom radu istra\v{z}eni su postupci financijskog planiranja i metode analize odstupanja izme\dj u planiranih i ostvarenih financijskih pokazatelja. Poseban naglasak stavljen je na primjenu statisti\v{c}kih metoda i metoda strojnog u\v{c}enja za predvi\dj anje financijskih kretanja. Podatci su prikupljeni iz stvarnog poslovnog okru\v{z}enja, anonimizirani i obra\dj eni u alatu Qlik Sense. Za predvi\dj anje su kori\v{s}teni Qlik Predict kao automatizirano no-code rje\v{s}enje te Python implementacije modela ARIMA, XGBoost i LSTM. Rezultati pokazuju da primjena metoda strojnog u\v{c}enja mo\v{z}e zna\v{c}ajno pobolj\v{s}ati to\v{c}nost financijskih prognoza u odnosu na tradicionalne pristupe.
+\end{sazetak}
+
+\begin{kljucnerijeci}
+  financijsko planiranje; strojno u\v{c}enje; predvi\dj anje; Qlik Sense; Qlik Predict; Python; analiza odstupanja
+\end{kljucnerijeci}
+
+% Abstract in English
+\begin{abstract}
+  This bachelor thesis explores financial planning procedures and methods for analysing deviations between planned and realised financial indicators. Special emphasis is placed on the application of statistical and machine learning methods for forecasting financial trends. Data were collected from a real business environment, anonymised, and processed using Qlik Sense. Qlik Predict was used as an automated no-code forecasting solution, while ARIMA, XGBoost, and LSTM models were implemented in Python for benchmarking. The results demonstrate that machine learning methods can significantly improve the accuracy of financial forecasts compared to traditional approaches.
+\end{abstract}
+
+\begin{keywords}
+  financial planning; machine learning; forecasting; Qlik Sense; Qlik Predict; Python; variance analysis
+\end{keywords}
+
+
+%--- PRIVITCI / APPENDIX -------------------------------------------------------
+\backmatter
+
+\chapter{Skripta za generiranje mock podataka}
+\label{app:mock_skripta}
+
+% TODO: Dodati Python skriptu za generiranje podataka
+
+
+\end{document}

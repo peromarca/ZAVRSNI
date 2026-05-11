@@ -1,0 +1,18 @@
+Pozdrav Petre,
+
+Može nešto ovako:
+
+Predviđanje financijskih pokazatelja primjenom metoda strojnog učenja
+Forecasting Financial Indicators Using Machine Learning Methods
+
+Istražiti i opisati postupke financijskog planiranja te metode analize odstupanja između planiranih i ostvarenih financijskih pokazatelja. Poseban naglasak staviti na postupke modeliranja financijskih kretanja primjenom statističkih i metoda strojnog učenja. Prikupiti i integrirati podatke iz više relevantnih izvora (npr. računovodstveni sustavi, ERP sustavi, javno dostupni financijski pokazatelji, makroekonomski pokazatelji). Osmisliti postupak objedinjavanja, čišćenja i transformacije podataka u jedinstveni analitički skup te provesti prikladno vrednovanje pristupa.
+
+Mislim da je na tragu onoga što htio, a dovoljno je općenito.
+Može potvrda je li ovo ok?
+
+izv. prof. dr. sc. Goran Delač
+Zavod za elektroniku, mikroelektroniku, računalne i inteligentne sustave
+Sveučilište u Zagrebu Fakultet elektrotehnike i računarstva
+
+
+
