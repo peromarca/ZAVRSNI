@@ -1,0 +1,205 @@
+// ============================================================
+// Qlik Sense ETL — Čišćenje i priprema podataka za ML
+// ============================================================
+
+// ---- Korak 1: Load i spajanje financijskih datoteka --------
+
+FinancialRaw:
+LOAD
+    fiscalDateEnding    AS Date,
+    'AAPL'              AS Company,
+    totalRevenue        AS Revenue_raw,
+    costOfRevenue       AS COGS_raw,
+    operatingExpenses   AS Operating_Expenses_raw,
+    ebitda              AS EBITDA_raw,
+    netIncome           AS Net_Income_raw,
+    grossProfit         AS Gross_Profit_raw,
+    operatingIncome     AS Operating_Income_raw
+FROM [lib://DataFiles/raw_financial_AAPL.csv]
+(txt, utf8, embedded labels, delimiter is ',')
+WHERE fiscalDateEnding >= '2015-01-01' AND fiscalDateEnding <= '2026-01-01';
+
+CONCATENATE (FinancialRaw)
+LOAD fiscalDateEnding AS Date, 'MSFT' AS Company,
+     totalRevenue AS Revenue_raw, costOfRevenue AS COGS_raw,
+     operatingExpenses AS Operating_Expenses_raw, ebitda AS EBITDA_raw,
+     netIncome AS Net_Income_raw, grossProfit AS Gross_Profit_raw,
+     operatingIncome AS Operating_Income_raw
+FROM [lib://DataFiles/raw_financial_MSFT.csv]
+(txt, utf8, embedded labels, delimiter is ',')
+WHERE fiscalDateEnding >= '2015-01-01' AND fiscalDateEnding <= '2026-01-01';
+
+CONCATENATE (FinancialRaw)
+LOAD fiscalDateEnding AS Date, 'GOOGL' AS Company,
+     totalRevenue AS Revenue_raw, costOfRevenue AS COGS_raw,
+     operatingExpenses AS Operating_Expenses_raw, ebitda AS EBITDA_raw,
+     netIncome AS Net_Income_raw, grossProfit AS Gross_Profit_raw,
+     operatingIncome AS Operating_Income_raw
+FROM [lib://DataFiles/raw_financial_GOOGL.csv]
+(txt, utf8, embedded labels, delimiter is ',')
+WHERE fiscalDateEnding >= '2015-01-01' AND fiscalDateEnding <= '2026-01-01';
+
+CONCATENATE (FinancialRaw)
+LOAD fiscalDateEnding AS Date, 'AMZN' AS Company,
+     totalRevenue AS Revenue_raw, costOfRevenue AS COGS_raw,
+     operatingExpenses AS Operating_Expenses_raw, ebitda AS EBITDA_raw,
+     netIncome AS Net_Income_raw, grossProfit AS Gross_Profit_raw,
+     operatingIncome AS Operating_Income_raw
+FROM [lib://DataFiles/raw_financial_AMZN.csv]
+(txt, utf8, embedded labels, delimiter is ',')
+WHERE fiscalDateEnding >= '2015-01-01' AND fiscalDateEnding <= '2026-01-01';
+
+CONCATENATE (FinancialRaw)
+LOAD fiscalDateEnding AS Date, 'META' AS Company,
+     totalRevenue AS Revenue_raw, costOfRevenue AS COGS_raw,
+     operatingExpenses AS Operating_Expenses_raw, ebitda AS EBITDA_raw,
+     netIncome AS Net_Income_raw, grossProfit AS Gross_Profit_raw,
+     operatingIncome AS Operating_Income_raw
+FROM [lib://DataFiles/raw_financial_META.csv]
+(txt, utf8, embedded labels, delimiter is ',')
+WHERE fiscalDateEnding >= '2015-01-01' AND fiscalDateEnding <= '2026-01-01';
+
+// ---- Korak 2: Čišćenje — None → NULL, type cast --------
+
+FinancialClean:
+LOAD
+    Date(Date#(Date, 'YYYY-MM-DD'), 'YYYY-MM-DD')                               AS Date,
+    Company,
+    IF(Revenue_raw = 'None', NULL(), Num(Revenue_raw))                           AS Revenue_full,
+    IF(COGS_raw = 'None', NULL(), Num(COGS_raw))                                 AS COGS_full,
+    IF(Operating_Expenses_raw = 'None', NULL(), Num(Operating_Expenses_raw))     AS OpEx_full,
+    IF(EBITDA_raw = 'None', NULL(), Num(EBITDA_raw))                             AS EBITDA_full,
+    IF(Net_Income_raw = 'None', NULL(), Num(Net_Income_raw))                     AS Net_Income_full,
+    IF(Gross_Profit_raw = 'None', NULL(), Num(Gross_Profit_raw))                 AS Gross_Profit_full,
+    IF(Operating_Income_raw = 'None', NULL(), Num(Operating_Income_raw))         AS Operating_Income_full
+RESIDENT FinancialRaw;
+
+DROP TABLE FinancialRaw;
+
+// ---- Korak 3: Konverzija puni USD → milijuni USD --------
+
+FinancialMillions:
+LOAD
+    Date,
+    Company,
+    Round(Revenue_full / 1000000, 0.01)         AS Revenue,
+    Round(COGS_full / 1000000, 0.01)             AS COGS,
+    Round(OpEx_full / 1000000, 0.01)             AS Operating_Expenses,
+    Round(EBITDA_full / 1000000, 0.01)           AS EBITDA,
+    Round(Net_Income_full / 1000000, 0.01)       AS Net_Income,
+    Round(Gross_Profit_full / 1000000, 0.01)     AS Gross_Profit,
+    Round(Operating_Income_full / 1000000, 0.01) AS Operating_Income
+RESIDENT FinancialClean;
+
+DROP TABLE FinancialClean;
+
+// ---- Korak 4: Load makro podataka (long → wide, agregacija na kvartale) --------
+// Floor() skida timestamp koji QuarterEnd() dodaje (23:59:59.999 → čisti datum)
+
+GDP_raw:
+LOAD
+    Date(Floor(QuarterEnd(Date#(date, 'YYYY-MM-DD'))), 'YYYY-MM-DD') AS QuarterEnd,
+    Num(value) AS GDP
+FROM [lib://DataFiles/raw_macro_all.csv]
+(txt, utf8, embedded labels, delimiter is ',')
+WHERE indicator = 'REAL_GDP' AND date >= '2015-01-01' AND date <= '2026-01-01';
+
+CPI_raw:
+LOAD
+    Date(Floor(QuarterEnd(Date#(date, 'YYYY-MM-DD'))), 'YYYY-MM-DD') AS QuarterEnd,
+    Avg(Num(value)) AS CPI
+FROM [lib://DataFiles/raw_macro_all.csv]
+(txt, utf8, embedded labels, delimiter is ',')
+WHERE indicator = 'CPI' AND date >= '2015-01-01' AND date <= '2026-01-01'
+GROUP BY Date(Floor(QuarterEnd(Date#(date, 'YYYY-MM-DD'))), 'YYYY-MM-DD');
+
+FedRate_raw:
+LOAD
+    Date(Floor(QuarterEnd(Date#(date, 'YYYY-MM-DD'))), 'YYYY-MM-DD') AS QuarterEnd,
+    Avg(Num(value)) AS Fed_Rate
+FROM [lib://DataFiles/raw_macro_all.csv]
+(txt, utf8, embedded labels, delimiter is ',')
+WHERE indicator = 'FEDERAL_FUNDS_RATE' AND date >= '2015-01-01' AND date <= '2026-01-01'
+GROUP BY Date(Floor(QuarterEnd(Date#(date, 'YYYY-MM-DD'))), 'YYYY-MM-DD');
+
+Unemployment_raw:
+LOAD
+    Date(Floor(QuarterEnd(Date#(date, 'YYYY-MM-DD'))), 'YYYY-MM-DD') AS QuarterEnd,
+    Avg(Num(value)) AS Unemployment
+FROM [lib://DataFiles/raw_macro_all.csv]
+(txt, utf8, embedded labels, delimiter is ',')
+WHERE indicator = 'UNEMPLOYMENT' AND date >= '2015-01-01' AND date <= '2026-01-01'
+GROUP BY Date(Floor(QuarterEnd(Date#(date, 'YYYY-MM-DD'))), 'YYYY-MM-DD');
+
+// ---- Korak 5: Normalizacija financijskih datuma na kraj kvartala --------
+
+FinancialAligned:
+LOAD
+    Date(Floor(QuarterEnd(Date#(Date, 'YYYY-MM-DD'))), 'YYYY-MM-DD') AS QuarterEnd,
+    Company,
+    Revenue,
+    COGS,
+    Operating_Expenses,
+    EBITDA,
+    Net_Income,
+    Gross_Profit,
+    Operating_Income
+RESIDENT FinancialMillions;
+
+DROP TABLE FinancialMillions;
+
+// ---- Korak 6: Join financijski + makro po datumu --------
+
+MasterData:
+LOAD
+    QuarterEnd  AS Date,
+    Company,
+    Revenue,
+    COGS,
+    Operating_Expenses,
+    EBITDA,
+    Net_Income,
+    Gross_Profit,
+    Operating_Income
+RESIDENT FinancialAligned;
+
+LEFT JOIN (MasterData)
+LOAD QuarterEnd AS Date, GDP RESIDENT GDP_raw;
+
+LEFT JOIN (MasterData)
+LOAD QuarterEnd AS Date, CPI RESIDENT CPI_raw;
+
+LEFT JOIN (MasterData)
+LOAD QuarterEnd AS Date, Fed_Rate RESIDENT FedRate_raw;
+
+LEFT JOIN (MasterData)
+LOAD QuarterEnd AS Date, Unemployment RESIDENT Unemployment_raw;
+
+DROP TABLES FinancialAligned, GDP_raw, CPI_raw, FedRate_raw, Unemployment_raw;
+
+// ---- Korak 7: Izvedene metrike, finalni dataset + Split kolona --------
+// Jedna tablica eliminira synthetic key upozorenja.
+// Split = 'Train' za 2015-2024, 'Test' za 2025.
+// Pri exportu u Qlik: desni klik na tablicu → Export → filtriraj po Split.
+
+FinalDataset:
+LOAD
+    Date,
+    Company,
+    Revenue,
+    COGS,
+    Operating_Expenses,
+    EBITDA,
+    Net_Income,
+    Gross_Profit,
+    Operating_Income,
+    GDP,
+    CPI,
+    Fed_Rate,
+    Unemployment,
+    Round(EBITDA / Revenue * 100, 0.01)          AS EBITDA_Margin,
+    IF(Year(Date) <= 2024, 'Train', 'Test')       AS Split
+RESIDENT MasterData
+WHERE Date >= '2015-01-01' AND Date <= '2026-01-01';
+
+DROP TABLE MasterData;
